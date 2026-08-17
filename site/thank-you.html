@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your window price range | AZ Window Services</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#01509C">
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1545426067332176');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-in">
+    <img class="hdr-logo" src="assets/logo.png" alt="AZ Window Services"
+         onerror="this.outerHTML='&lt;span class=&quot;hdr-word&quot;&gt;AZ Window Services&lt;/span&gt;'">
+    <a class="hdr-call js-call" href="tel:4804180647">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 006.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.2.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 013 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>
+      <span>Call</span>
+    </a>
+  </div>
+</header>
+
+<section class="quiz-wrap">
+  <div class="quiz-card est">
+    <div class="est-kick">Your estimate</div>
+
+    <div class="est-range" id="estRange">$980 – $1,350</div>
+    <div class="est-unit">per window, installed</div>
+
+    <div class="est-total" id="estTotal" hidden>
+      <b id="estTotalVal"></b>
+      <span id="estTotalNote"></span>
+    </div>
+
+    <ul class="est-ticks">
+      <li>Locked in for 30 days — no obligation to buy</li>
+      <li>Free in-home measure confirms the exact number</li>
+      <li>Lifetime limited warranty on residential product</li>
+      <li>Monthly financing available through Wisetack</li>
+    </ul>
+
+    <a class="btn btn-primary btn-jump js-call" href="tel:4804180647">
+      Call now to book your measure
+    </a>
+
+    <p class="est-fine">
+      A specialist will reach out shortly to confirm your free measure.
+      Prefer to talk now? Call <b>(480) 418-0647</b>, Mon–Sat 8am–5pm.
+    </p>
+  </div>
+</section>
+
+<footer class="ftr">
+  <img class="ftr-logo" src="assets/logo.png" alt="AZ Window Services" onerror="this.remove()">
+  <p class="ftr-lic">AZ Window Services LLC · ROC #359157</p>
+  <p class="ftr-hours">Mon–Sat 8am–5pm · Closed Sunday</p>
+  <a class="ftr-phone js-call" href="tel:4804180647">(480) 418-0647</a>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var sp = new URLSearchParams(location.search);
+
+  /* Lead fires here and ONLY here, carrying the eventID minted on the lander so
+     it dedupes against the server-side Conversions API event. */
+  var eid = sp.get('eid') || '';
+  try {
+    if (window.fbq) {
+      window.fbq('track', 'Lead', { content_name: 'window replacement quiz' },
+                 eid ? { eventID: eid } : undefined);
+    }
+  } catch (e) {}
+
+  /* Re-render the range the visitor was shown, from the URL. Falls back to the
+     defaults baked into the markup if the params are missing. */
+  function money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+  var est = (sp.get('est') || '').split('-');
+  var n = parseInt(sp.get('n'), 10);
+  if (est.length === 2) {
+    var lo = parseInt(est[0], 10), hi = parseInt(est[1], 10);
+    if (lo > 0 && hi > 0) {
+      document.getElementById('estRange').textContent = money(lo) + ' – ' + money(hi);
+      if (n > 0) {
+        document.getElementById('estTotalVal').textContent = money(lo * n) + ' – ' + money(hi * n);
+        document.getElementById('estTotalNote').textContent =
+          'estimated total for about ' + n + ' windows';
+        document.getElementById('estTotal').hidden = false;
+      }
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a.js-call') : null;
+    if (a && window.fbq) window.fbq('track', 'Contact', { source: 'thank_you' });
+  });
+})();
+</script>
+</body>
+</html>
