@@ -15,6 +15,10 @@
   --line:      #D1D5DB;
   --white:     #FFFFFF;
   --ok:        #10B981;
+  /* Hero amber, taken off the logo's sun mark. */
+  --amber:      #E8920F;
+  --amber-deep: #B25C05;
+  --amber-lit:  #F5A623;
   --radius:    14px;
   --shadow:    0 10px 30px rgba(1, 80, 156, .12);
   --shadow-lg: 0 18px 50px rgba(1, 80, 156, .20);
@@ -63,9 +67,12 @@ img { max-width: 100%; display: block; }
 .hdr-call svg { width: 16px; height: 16px; fill: currentColor; }
 
 /* =============================== HERO =============================== */
+/* Hero overlay is the logo's orange/yellow, not the site blue. It also runs
+   darker at the bottom than the old blue did, so the one button down there has
+   something quiet to sit against. */
 .hero {
   position: relative; isolation: isolate; overflow: hidden;
-  background: linear-gradient(160deg, var(--blue-deep) 0%, var(--blue-mid) 55%, var(--blue) 100%);
+  background: linear-gradient(160deg, var(--amber-deep) 0%, var(--amber) 55%, var(--amber-lit) 100%);
   color: var(--white);
   padding: 34px 18px 40px;
 }
@@ -75,36 +82,41 @@ img { max-width: 100%; display: block; }
 }
 .hero-scrim {
   position: absolute; inset: 0; z-index: -1;
-  background: linear-gradient(180deg, rgba(1,80,156,.86) 0%, rgba(1,80,156,.72) 45%, rgba(4,107,210,.88) 100%);
+  background: linear-gradient(180deg, rgba(214,116,10,.88) 0%, rgba(232,146,17,.74) 40%, rgba(140,66,4,.92) 100%);
 }
 .hero-in { max-width: 620px; margin: 0 auto; text-align: center; }
 
+/* Was a bordered pill. Same words, no chrome — the hero had four things that
+   read as buttons and only one of them was clickable. */
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 7px;
-  font-size: 12.5px; font-weight: 500; letter-spacing: .01em;
-  background: rgba(255,255,255,.14);
-  border: 1px solid rgba(255,255,255,.22);
-  border-radius: 999px; padding: 6px 13px; margin-bottom: 18px;
+  font-size: 12.5px; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: rgba(255,255,255,.9);
+  margin-bottom: 16px;
 }
-.hero-eyebrow .dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--cyan); box-shadow: 0 0 0 3px rgba(30,205,255,.28);
-}
+/* The dot was the pill's "live" indicator. With the pill gone it just reads as
+   a stray bullet beside two wrapped lines, so it goes. */
+.hero-eyebrow .dot { display: none; }
 
 .hero h1 { font-size: clamp(28px, 7.6vw, 42px); font-weight: 800; margin-bottom: 12px; }
 .hero-sub { font-size: 16px; color: rgba(255,255,255,.9); margin-bottom: 20px; }
 
+/* Same three claims, as a plain line of text instead of three boxes. */
 .hero-bullets {
-  list-style: none; margin: 0 0 24px; padding: 0;
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  list-style: none; margin: 0 0 26px; padding: 0;
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 6px 18px;
 }
 .hero-bullets li {
-  font-size: 13px; font-weight: 500;
-  background: rgba(255,255,255,.13);
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: 10px; padding: 8px 12px;
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 14px; font-weight: 500; color: rgba(255,255,255,.94);
 }
-.hero-bullets b { color: var(--cyan); font-weight: 700; }
+.hero-bullets li::before {
+  content: ""; flex: none;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: rgba(255,255,255,.22) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M9.6 16.6 5 12l1.4-1.4 3.2 3.2 8-8L19 7.2z'/%3E%3C/svg%3E") center/11px no-repeat;
+}
+.hero-bullets b { color: var(--white); font-weight: 700; }
 
 .hero-trust { margin-top: 18px; font-size: 13px; color: rgba(255,255,255,.86); }
 .hero-trust span { color: #FFC53D; letter-spacing: 2px; }
@@ -122,6 +134,17 @@ img { max-width: 100%; display: block; }
   color: #04283F; box-shadow: 0 8px 22px rgba(30,205,255,.35);
 }
 .btn-primary:active { transform: translateY(1px); }
+
+/* The hero CTA is deliberately unlike every other control on the page: solid
+   white on the amber hero, where everything else is either plain text or a
+   blue-on-white button. Nothing else up here competes with it. */
+.hero .btn-primary {
+  background: var(--white);
+  color: var(--blue-deep);
+  font-size: 18px; padding: 18px 28px;
+  box-shadow: 0 10px 28px rgba(90,42,2,.34);
+}
+.hero .btn-primary svg { fill: var(--blue-deep); opacity: .75; }
 .btn-jump { width: 100%; max-width: 380px; }
 .btn-jump svg { width: 18px; height: 18px; fill: currentColor; }
 .btn[disabled] { opacity: .45; cursor: not-allowed; box-shadow: none; }
@@ -141,16 +164,53 @@ img { max-width: 100%; display: block; }
   transition: width .32s cubic-bezier(.4,0,.2,1);
 }
 .quiz-meta {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; justify-content: flex-start; align-items: center;
   font-size: 11.5px; color: var(--ink-soft); margin: 9px 0 18px;
 }
-.secure { display: inline-flex; align-items: center; gap: 5px; }
-.secure svg { width: 13px; height: 13px; fill: var(--ok); }
 
 .q-title { font-size: 21px; font-weight: 700; margin: 0 0 4px; }
 .q-help  { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 16px; }
 
 /* option list — big tap targets, single column on phones */
+/* ---- window-count slider (step 1) ---------------------------------- */
+/* The count drives a banded rate, so the price under the number moves as the
+   visitor drags — the discount for a bigger job is the point of the screen. */
+.count { text-align: center; padding: 10px 2px 4px; margin-bottom: 16px; }
+.count-n {
+  font-size: 54px; font-weight: 800; line-height: 1.05;
+  color: var(--blue-mid); letter-spacing: -.02em;
+}
+.count-rate {
+  font-size: 14.5px; font-weight: 600; color: var(--ink-soft);
+  margin: 2px 0 22px;
+}
+.count-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 8px; border-radius: 999px; margin: 0;
+  background: linear-gradient(90deg, var(--blue) var(--pct, 37%),
+                              var(--line) var(--pct, 37%));
+  cursor: pointer; outline: none;
+}
+.count-slider:focus-visible { box-shadow: 0 0 0 4px rgba(1, 139, 254, .22); }
+/* Thumb rules can't be combined — a browser drops the whole selector if it
+   doesn't recognise one of the pseudo-elements. */
+.count-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--white); border: 3px solid var(--blue);
+  box-shadow: 0 3px 10px rgba(1, 80, 156, .28); cursor: grab;
+}
+.count-slider::-moz-range-thumb {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--white); border: 3px solid var(--blue);
+  box-shadow: 0 3px 10px rgba(1, 80, 156, .28); cursor: grab;
+}
+.count-ends {
+  display: flex; justify-content: space-between;
+  font-size: 12px; font-weight: 600; color: var(--ink-soft);
+  margin-top: 9px; padding: 0 2px;
+}
+
 .opts { display: grid; gap: 10px; margin-bottom: 16px; }
 .opts.two { grid-template-columns: 1fr 1fr; }
 .opt {
@@ -201,6 +261,10 @@ img { max-width: 100%; display: block; }
   font-family: inherit; font-size: 13.5px; color: var(--ink-soft);
   cursor: pointer; padding: 6px;
 }
+/* `display: block` above outranks the browser's own [hidden] rule, so app.js
+   setting .hidden on step 1 had no effect and a dead "Back" sat under the
+   first question. Any element the quiz hides needs this. */
+.quiz-back[hidden] { display: none; }
 
 /* ------------------------- estimate reveal ------------------------- */
 .est { text-align: center; }
@@ -208,17 +272,27 @@ img { max-width: 100%; display: block; }
   font-size: 12px; font-weight: 600; letter-spacing: .1em;
   text-transform: uppercase; color: var(--blue-mid); margin-bottom: 10px;
 }
-.est-range {
-  font-size: clamp(34px, 10vw, 46px); font-weight: 800;
-  color: var(--blue-deep); line-height: 1.05; letter-spacing: -.03em;
+/* The reveal leads with the financing line and the per-window rate sits under
+   the CTA (.est-rate). Sized below the old price clamp of 46px: this string is
+   several times longer than "$1,400" and broke mid-phrase on a 390px screen. */
+.est-headline {
+  font-size: clamp(26px, 7vw, 34px); font-weight: 800;
+  color: var(--blue-deep); line-height: 1.15; letter-spacing: -.02em;
 }
-.est-unit { font-size: 14px; font-weight: 500; color: var(--ink-soft); margin-top: 4px; }
 .est-total {
   background: var(--wash); border-radius: 12px;
   padding: 14px; margin: 18px 0;
 }
 .est-total b { display: block; font-size: 20px; color: var(--ink); }
 .est-total span { font-size: 12.5px; color: var(--ink-soft); }
+.est-save {
+  font-size: 13.5px; font-weight: 700; color: var(--ok);
+  margin: 12px 0 0;
+}
+.est-incl {
+  font-size: 12px; font-weight: 500; color: var(--ink-soft);
+  margin: 8px 0 18px;
+}
 .est-ticks { list-style: none; padding: 0; margin: 0 0 18px; text-align: left; }
 .est-ticks li {
   font-size: 14px; padding: 6px 0 6px 26px; position: relative; color: var(--ink-soft);
@@ -227,6 +301,10 @@ img { max-width: 100%; display: block; }
   content: ''; position: absolute; left: 6px; top: 12px;
   width: 5px; height: 10px; border: solid var(--ok);
   border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
+}
+.est-rate {
+  font-size: 13.5px; font-weight: 600; color: var(--ink-soft);
+  margin: 14px 0 0;
 }
 .est-fine { font-size: 11.5px; color: var(--ink-soft); margin-top: 12px; }
 

@@ -13,17 +13,33 @@ window.AZW = {
   LEAD_ENDPOINT: '/api/lead',        // Netlify function (netlify/functions/lead.mjs)
   THANK_YOU_URL: 'thank-you.html',
 
-  /* Installed price per window, and the window count each bucket is priced at.
-     The buckets' labels are also the literal "Window amount" values written to
-     the sheet — the existing rows use "<10" and "20+", so do not reword them.
-     `typical` is the count used to turn a per-window range into a job total. */
+  /* AZ Window Services' own pricing, ported from the client's estimate form
+     (AZW-Estimate-Form, src/components/LeadForm.tsx — PRICE_BANDS/getEstimate).
+     These are the client's real numbers; the $980–$1,350 range this lander
+     shipped with was PearlVFX's guess and is gone.
+
+     Flat-band tiering: the rate is one number per window, flat across the whole
+     band, and the total is simply rate x count. There is no low/high range —
+     the visitor is shown a single price per window, which is why the quiz asks
+     for an exact count rather than a bucket. 20 or more is quoted on site and
+     shows no total, matching the "$1,150 / window (quoted on site)" rows the
+     client already has in the lead sheet.
+
+     Editing a rate here changes what the visitor sees, what goes in the sheet's
+     "Estimate" column and the savings line — nothing else depends on them. Keep
+     the bands contiguous and in ascending order. */
   PRICING: {
-    perWindow: { low: 980, high: 1350 },
-    buckets: {
-      '<10':   { typical: 8,  label: 'Fewer than 10' },
-      '10-19': { typical: 14, label: '10 to 19' },
-      '20+':   { typical: 22, label: '20 or more' }
-    },
-    lockDays: 30
+    bands: [
+      { min: 1,  max: 2,  rate: 1800 },
+      { min: 3,  max: 5,  rate: 1600 },
+      { min: 6,  max: 10, rate: 1400 },
+      { min: 11, max: 19, rate: 1270 },
+      { min: 20, max: 20, rate: 1150 }
+    ],
+    fallbackRate:  1150,   // count outside every band (i.e. above 20)
+    baselineRate:  1800,   // single-window rate the savings line compares against
+    defaultCount:  8,      // where the slider starts, as in the client's form
+    maxCount:      20,     // the slider's top stop; 20 means "20 or more"
+    lockDays:      90
   }
 };
