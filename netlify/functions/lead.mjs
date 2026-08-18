@@ -97,8 +97,13 @@ async function sendToSheet(d, c) {
       action: 'lead_submission',
       webhook_token: c.token,
       row: toSheetRow(d),
-      // extra qualifying answers, appended past the known columns
+      /* Extra qualifying answers, appended past the known columns. windowCount
+         is the exact number of windows the visitor set on the slider — the
+         "Window amount" column above keeps its '<10'/'10-19'/'20+' buckets, so
+         this is the only place the real count is recorded, and it is what the
+         banded rate in the "Estimate" column was calculated from. */
       extra: {
+        windowCount: d.windowCount == null ? '' : String(d.windowCount),
         zip: d.zip || '', windowAge: d.windowAge || '', priorities: d.priorities || '',
         ownership: d.ownership || '', timeline: d.timeline || '',
         permission: d.permission || '', utm_content: d.utm_content || '',
@@ -175,17 +180,28 @@ export default async function handler(req) {
   }
 
   const c = cfg();
-  // The pixel event is best-effort; the sheet write is the one that matters, so
-  // a CAPI outage must never turn into a failed submission.
-  const results = await Promise.allSettled([sendToSheet(d, c), sendCapiLead(d, req, c)]);
-  const sheet = results[0];
 
-  if (sheet.status === 'rejected') {
-    console.error('sheet write failed:', sheet.reason?.message || sheet.reason);
-    // 200 on purpose: the browser already wrote to the Netlify form backup and
-    // is mid-redirect. Surfacing a 500 here would only strand the visitor.
+  /* Order matters: the sheet write has to succeed before any conversion event
+     goes anywhere. Running the two together (as this did) reported a Lead to
+     Meta even when the lead never reached the client's spreadsheet, which is
+     exactly the inflated count we are getting rid of. */
+  try {
+    await sendToSheet(d, c);
+  } catch (e) {
+    console.error('sheet write failed:', e?.message || e);
+    /* 200 on purpose, but the body is the truth: the browser reads `status` to
+       decide whether it captured the lead, and its own hidden-form backup may
+       still have caught what we dropped. A 500 would tell it nothing more. No
+       CAPI event is sent — an unrecorded lead is not a conversion. */
     return json({ status: 'partial', sheet: 'failed' });
   }
+
+  /* The row is in the spreadsheet, so the conversion is real. Still
+     best-effort: a CAPI outage must never turn a captured lead into a failure,
+     and the browser pixel carries the same event_id for dedupe. */
+  await sendCapiLead(d, req, c).catch((e) => {
+    console.error('CAPI failed:', e?.message || e);
+  });
   return json({ status: 'ok' });
 }
 

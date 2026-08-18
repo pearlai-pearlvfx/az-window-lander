@@ -8,8 +8,19 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#01509C">
 
+<!-- Preview mode. MUST stay above the pixel: it decides whether the pixel
+     loads at all, and once fbevents.js is in the page a PageView has already
+     been sent. /preview is a rewrite of this same file (see netlify.toml), so
+     the path is what identifies it; ?preview=1 carries the mode across the
+     redirect to thank-you.html. -->
+<script>
+window.AZW_PREVIEW = /(^|[?&])preview=1(&|$)/.test(location.search) ||
+                     /^\/preview(\/|$)/.test(location.pathname);
+</script>
+
 <!-- Meta Pixel Code -->
 <script>
+if (!window.AZW_PREVIEW) {
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -20,7 +31,10 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '1545426067332176');
 fbq('track', 'PageView');
+}
 </script>
+<!-- The noscript beacon can't be conditional, but it only fires for a visitor
+     with JavaScript off — who cannot use the quiz at all. -->
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
 /></noscript>
@@ -47,12 +61,14 @@ src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
 
 <!-- ============================= HERO ============================= -->
 <section class="hero">
-  <!-- ASSET SLOT: drop hero.mp4 into site/assets/ and it plays automatically —
-       no code change needed. Until then the element loads nothing and the
-       gradient on .hero carries the section, so the layout never depends on
-       the file being there. Add poster="assets/hero-poster.jpg" alongside the
-       video when a still exists; without the file it would only 404. -->
-  <video class="hero-media" autoplay muted loop playsinline preload="metadata">
+  <!-- Hero loop: a 10s silent install clip, 720x1280 H.264 (724KB, faststart) —
+       re-encoded from the client's vertical original, which was HEVC in a .mov
+       and would not have played in Chrome or Firefox. The poster is frame 3s of
+       the same clip, so the section looks identical before the video decodes.
+       Both are decoration: the gradient on .hero carries the layout on its own,
+       and prefers-reduced-motion hides the element entirely. -->
+  <video class="hero-media" autoplay muted loop playsinline preload="metadata"
+         poster="assets/hero-poster.jpg">
     <source src="assets/hero.mp4" type="video/mp4">
   </video>
   <div class="hero-scrim"></div>
@@ -64,8 +80,8 @@ src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
 
     <!-- EDIT: hero headline -->
     <h1>How much does it cost to replace your windows?</h1>
-    <p class="hero-sub">A few quick questions and you'll see your price range
-      instantly — about 60 seconds, no salesperson, no obligation.</p>
+    <p class="hero-sub">A few quick questions and you'll see your price per
+      window instantly — about 60 seconds, no salesperson, no obligation.</p>
 
     <ul class="hero-bullets">
       <li><b>Lower</b> summer power bills</li>
@@ -74,7 +90,7 @@ src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
     </ul>
 
     <a class="btn btn-primary btn-jump" href="#quiz">
-      See my price range
+      See my price per window
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16l-6-6h12z"/></svg>
     </a>
 
@@ -90,11 +106,7 @@ src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
     <div class="quiz-head">
       <div class="prog"><div class="prog-bar" id="progBar"></div></div>
       <div class="quiz-meta">
-        <span id="stepLabel">1 of 6</span>
-        <span class="secure">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1l9 4v6c0 5.5-3.8 10.7-9 12-5.2-1.3-9-6.5-9-12V5l9-4z"/></svg>
-          Safe, secure &amp; confidential
-        </span>
+        <span id="stepLabel">1 of 7</span>
       </div>
     </div>
 
@@ -163,6 +175,7 @@ src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
   <input type="hidden" name="form-name" value="lead-backup">
   <input name="bot-field">
   <input name="timestamp"><input name="address"><input name="windowAmount">
+  <input name="windowCount">
   <input name="requested"><input name="email"><input name="name">
   <input name="phone"><input name="estimate"><input name="zip">
   <input name="windowAge"><input name="priorities"><input name="ownership">

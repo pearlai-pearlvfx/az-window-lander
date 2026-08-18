@@ -1,0 +1,7 @@
+# /preview is the sandboxed lander: same page, both writes disconnected,
+# pixel held back. netlify.toml redirects were not applied on this project,
+# but a _redirects file in the publish dir is.
+#
+# No trailing-slash rule: Netlify normalises /preview/ to /preview itself, so
+# a "/preview/ -> /preview" line matches both and 301s to itself.
+/preview   /index.html   200

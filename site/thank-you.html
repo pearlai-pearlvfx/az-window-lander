@@ -3,12 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Your window price range | AZ Window Services</title>
+<title>Your window price | AZ Window Services</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#01509C">
 
+<!-- Preview mode — see the note in index.html. app.js carries ?preview=1 here,
+     and it must be read before the pixel: no init means the Lead call below is
+     a no-op, so a sandboxed walkthrough reports no conversion. -->
+<script>
+window.AZW_PREVIEW = /(^|[?&])preview=1(&|$)/.test(location.search) ||
+                     /^\/preview(\/|$)/.test(location.pathname);
+</script>
+
 <!-- Meta Pixel Code -->
 <script>
+if (!window.AZW_PREVIEW) {
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -19,6 +28,7 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '1545426067332176');
 fbq('track', 'PageView');
+}
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
@@ -47,16 +57,20 @@ src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
   <div class="quiz-card est">
     <div class="est-kick">Your estimate</div>
 
-    <div class="est-range" id="estRange">$980 – $1,350</div>
-    <div class="est-unit">per window, installed</div>
+    <!-- EDIT: reveal headline. The per-window rate moved below the CTA
+         (.est-rate) so this line carries the card. -->
+    <div class="est-headline">$0 down applied &#9989;</div>
 
     <div class="est-total" id="estTotal" hidden>
       <b id="estTotalVal"></b>
       <span id="estTotalNote"></span>
     </div>
 
+    <p class="est-save" id="estSave" hidden></p>
+    <p class="est-incl">Includes the window, all labor, haul-away and disposal.</p>
+
     <ul class="est-ticks">
-      <li>Locked in for 30 days — no obligation to buy</li>
+      <li>Locked in for 90 days — no obligation to buy</li>
       <li>Free in-home measure confirms the exact number</li>
       <li>Lifetime limited warranty on residential product</li>
       <li>Monthly financing available through Wisetack</li>
@@ -65,6 +79,8 @@ src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
     <a class="btn btn-primary btn-jump js-call" href="tel:4804180647">
       Call now to book your measure
     </a>
+
+    <p class="est-rate" id="estRate">$1,400 per window, installed</p>
 
     <p class="est-fine">
       A specialist will reach out shortly to confirm your free measure.
@@ -86,29 +102,74 @@ src="https://www.facebook.com/tr?id=1545426067332176&ev=PageView&noscript=1"
   var sp = new URLSearchParams(location.search);
 
   /* Lead fires here and ONLY here, carrying the eventID minted on the lander so
-     it dedupes against the server-side Conversions API event. */
-  var eid = sp.get('eid') || '';
+     it dedupes against the server-side Conversions API event.
+
+     It also fires ONLY for a visit carrying the conversion gate that app.js
+     opens after a write has actually landed. Reaching this page is not by
+     itself a conversion: a refresh, a bookmark, a shared link, a back-button
+     return, or a submission whose writes all failed all arrive here without the
+     gate and count nothing. The token is consumed on use, so one lead can never
+     be counted twice. Do not "simplify" this back into an unconditional fire —
+     that is what was inflating the Lead count. */
+  var eid  = sp.get('eid') || '';
+  var gate = false;
   try {
-    if (window.fbq) {
-      window.fbq('track', 'Lead', { content_name: 'window replacement quiz' },
-                 eid ? { eventID: eid } : undefined);
+    var tok = sessionStorage.getItem('azw_lead_ok');
+    if (tok && (!eid || tok === eid)) {
+      sessionStorage.removeItem('azw_lead_ok');
+      gate = true;
     }
   } catch (e) {}
+  // Fallback for browsers where storage is unavailable; stripped below so a
+  // reload cannot replay it.
+  if (!gate && sp.get('ok') === '1') gate = true;
 
-  /* Re-render the range the visitor was shown, from the URL. Falls back to the
-     defaults baked into the markup if the params are missing. */
+  if (gate) {
+    try {
+      if (window.fbq) {
+        window.fbq('track', 'Lead', { content_name: 'window replacement quiz' },
+                   eid ? { eventID: eid } : undefined);
+      }
+    } catch (e) {}
+    try {
+      sp.delete('ok');
+      var rest = sp.toString();
+      history.replaceState(null, '', location.pathname + (rest ? '?' + rest : ''));
+    } catch (e) {}
+  }
+
+  /* Re-render the price the visitor was shown, from the URL. app.js does the
+     banding; this page only formats what it was handed, so the two can't
+     disagree. Falls back to the markup defaults if the params are missing.
+
+     20 or more windows is quoted on site: rate only, no total — same as the
+     client's own estimate form, and the reason `Estimate` rows for big jobs
+     read "$1,150 / window (quoted on site)". */
   function money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
-  var est = (sp.get('est') || '').split('-');
-  var n = parseInt(sp.get('n'), 10);
-  if (est.length === 2) {
-    var lo = parseInt(est[0], 10), hi = parseInt(est[1], 10);
-    if (lo > 0 && hi > 0) {
-      document.getElementById('estRange').textContent = money(lo) + ' – ' + money(hi);
-      if (n > 0) {
-        document.getElementById('estTotalVal').textContent = money(lo * n) + ' – ' + money(hi * n);
-        document.getElementById('estTotalNote').textContent =
-          'estimated total for about ' + n + ' windows';
-        document.getElementById('estTotal').hidden = false;
+  var BASELINE = 1800;   // single-window rate the savings line compares against
+  var rate = parseInt(sp.get('rate'), 10);
+  var n    = parseInt(sp.get('n'), 10);
+
+  if (rate > 0) {
+    document.getElementById('estRate').textContent =
+      money(rate) + ' per window, installed';
+
+    if (n >= 20) {
+      document.getElementById('estTotalNote').textContent =
+        'Projects of 20 or more windows are quoted on site.';
+      document.getElementById('estTotal').hidden = false;
+    } else if (n > 0) {
+      document.getElementById('estTotalVal').textContent = money(rate * n);
+      document.getElementById('estTotalNote').textContent =
+        'estimated total for ' + n + ' window' + (n === 1 ? '' : 's');
+      document.getElementById('estTotal').hidden = false;
+
+      var saved = (BASELINE - rate) * n;
+      if (n > 2 && saved > 0) {
+        document.getElementById('estSave').textContent =
+          'At ' + n + ' windows you’re saving ' + money(saved) +
+          ' against our single-window rate.';
+        document.getElementById('estSave').hidden = false;
       }
     }
   }
